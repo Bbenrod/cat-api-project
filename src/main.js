@@ -14,23 +14,22 @@ const getRandomCat = async () => {
 
     const container = document.querySelector("#random-cats-images");
 
-    container.innerHTML = "";
-
-    data.forEach((cat) => {
-      const img = document.createElement("img");
-      img.src = cat.url;
-      img.alt = "Cat";
-      img.classList.add("cat-image");
-      container.appendChild(img);
+    const likeButton = document.createElement("button");
+    likeButton.textContent = "Like";
+    likeButton.classList.add("like-button");
+    likeButton.addEventListener("click", () => {
+      // Aquí podrías implementar la lógica para incrementar el contador de likes, por ejemplo
+      console.log(cat);
+      console.log("Liked cat:", cat.id);
+      saveFavouriteCats(cat.id);
+      getFavoriteCats();
     });
 
-    console.log(data);
+    setCats(container, data, likeButton);
   } catch (error) {
     console.error("Error fetching cat:", error);
   }
 };
-
-getRandomCat();
 
 buttonRandom.addEventListener("click", getRandomCat);
 
@@ -41,27 +40,63 @@ const API_FAVORITES_URL = API_BASE_URL + "favourites";
 const getFavoriteCats = async () => {
   try {
     const res = await fetch(`${API_FAVORITES_URL}?api_key=${API_KEY}`);
-    // const res = await fetch(
-    //   `https://api.thecatapi.com/v1/favourites?api_key=${API_KEY}`
-    // );
+
     const data = await res.json();
 
     const container = document.querySelector("#favorites-cats-images");
 
-    container.innerHTML = "";
+    // Usar setCats para agregar solo imágenes (sin botón adicional)
+    setCats(
+      container,
+      data.map((cat) => cat.image)
+    );
 
-    data.forEach((cat) => {
-      const img = document.createElement("img");
-      img.src = cat.url;
-      img.alt = "Cat";
-      img.classList.add("cat-image");
-      container.appendChild(img);
-    });
-
+    console.log("Favorites:");
     console.log(data);
   } catch (error) {
     console.error("Error fetching favorite cats:", error);
   }
 };
 
-getFavoriteCats();
+const saveFavouriteCats = async (image_id) => {
+  const res = await fetch(`${API_FAVORITES_URL}?api_key=${API_KEY}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      image_id,
+    }),
+  });
+};
+
+//Init
+(() => {
+  getFavoriteCats();
+  getRandomCat();
+  console.log("Init");
+})();
+
+//Utils
+const setCats = (container, cats, button) => {
+  container.innerHTML = ""; // Limpiamos el contenido actual del contenedor
+
+  cats.forEach((cat) => {
+    // Creamos un div para cada gato
+    const catDiv = document.createElement("div");
+    catDiv.classList.add("cat-container");
+
+    // Creamos la imagen del gato
+    const img = document.createElement("img");
+    img.src = cat.url;
+    img.alt = "Cat";
+    img.classList.add("cat-image");
+    catDiv.appendChild(img);
+
+    // Creamos el botón de like
+    if (button) catDiv.appendChild(button);
+
+    // Agregamos el div del gato al contenedor principal
+    container.appendChild(catDiv);
+  });
+};
