@@ -14,18 +14,18 @@ const getRandomCat = async () => {
 
     const container = document.querySelector("#random-cats-images");
 
-    const likeButton = document.createElement("button");
-    likeButton.textContent = "Like";
-    likeButton.classList.add("like-button");
-    likeButton.addEventListener("click", () => {
-      // Aquí podrías implementar la lógica para incrementar el contador de likes, por ejemplo
-      console.log(cat);
-      console.log("Liked cat:", cat.id);
-      saveFavouriteCats(cat.id);
-      getFavoriteCats();
-    });
+    const createLikeButton = (cat) => {
+      const likeButton = document.createElement("button");
+      likeButton.textContent = "Like";
+      likeButton.classList.add("like-button");
+      likeButton.addEventListener("click", () => {
+        saveFavouriteCats(cat.id);
+        getFavoriteCats();
+      });
+      return likeButton;
+    };
 
-    setCats(container, data, likeButton);
+    setCats(container, data, createLikeButton);
   } catch (error) {
     console.error("Error fetching cat:", error);
   }
@@ -78,7 +78,7 @@ const saveFavouriteCats = async (image_id) => {
 })();
 
 //Utils
-const setCats = (container, cats, button) => {
+const setCats = (container, cats, createButton) => {
   container.innerHTML = ""; // Limpiamos el contenido actual del contenedor
 
   cats.forEach((cat) => {
@@ -94,7 +94,7 @@ const setCats = (container, cats, button) => {
     catDiv.appendChild(img);
 
     // Creamos el botón de like
-    if (button) catDiv.appendChild(button);
+    if (createButton) catDiv.appendChild(createButton(cat));
 
     // Agregamos el div del gato al contenedor principal
     container.appendChild(catDiv);
